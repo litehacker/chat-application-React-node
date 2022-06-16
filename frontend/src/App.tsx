@@ -8,7 +8,7 @@ const App = () => {
     new Data().getMessages()
   );
   const [userId] = React.useState("2");
-  const [prevMessageUser, setPrevMessageUser] = React.useState<string>();
+  const [inputValue, setInputValue] = React.useState<string>("");
 
   return (
     <div className="App">
@@ -28,11 +28,25 @@ const App = () => {
         </div>
         <input
           placeholder="Hit Enter to send"
-          onSubmit={() => console.log("submited input")}
+          onKeyDown={(e) => {
+            return handleKeyDown(e, setInputValue);
+          }}
+          value={inputValue}
+          onChange={(event) => {
+            setInputValue(event.target.value);
+          }}
         />
       </div>
     </div>
   );
+};
+const handleKeyDown = (
+  event: React.KeyboardEvent<HTMLInputElement>,
+  setInputValue: React.Dispatch<React.SetStateAction<string>>
+) => {
+  if (event.key === "Enter") {
+    setInputValue("");
+  }
 };
 
 export default App;
