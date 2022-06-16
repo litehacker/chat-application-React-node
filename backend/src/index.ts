@@ -15,7 +15,11 @@ const io = new Server<
   ServerToClientEvents,
   InterServerEvents,
   SocketData
->(httpServer, {});
+>(httpServer, {
+  cors: {
+    origin: "http://localhost:3000",
+  },
+});
 
 io.on("ping", () => {
   console.log("ping, they say");

@@ -3,6 +3,7 @@ import "./App.scss";
 import { Data } from "./DummyData/data";
 import { User } from "./InterfaceTypes/intex";
 import { MessageType } from "./types";
+const { io } = require("socket.io-client");
 
 const App = () => {
   const [messages, setMessages] = React.useState<MessageType[]>(
@@ -10,6 +11,10 @@ const App = () => {
   );
   const [user] = React.useState<User>(new Data().getUser());
   const [inputValue, setInputValue] = React.useState<string>("");
+  const [socket] = React.useState(io("http://localhost:5000"));
+  socket.on("connect", () => {
+    console.log(socket.id); // x8WIv7-mJelg7on_ALbx
+  });
 
   return (
     <div className="App">
@@ -28,9 +33,10 @@ const App = () => {
           <h2>Chat with - {user.name}</h2>
         </div>
         <div className="chat">
-          {messages.map((message) => {
+          {messages.map((message, i) => {
             return (
               <div
+                key={i}
                 className={`${
                   message.author === user.id ? "mine" : "yours"
                 } messages `}
