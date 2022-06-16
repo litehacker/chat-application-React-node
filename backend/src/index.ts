@@ -1,14 +1,44 @@
-import http from "http"; // 1 - Import Node.js core module
+import { Server } from "socket.io";
+import {
+  ClientToServerEvents,
+  ServerToClientEvents,
+  InterServerEvents,
+  SocketData,
+} from "./InterfaceTypes/intex";
 
-var server = http.createServer((req, res) => {
-  if (req.url == "/") {
-    res.writeHead(200, { "Content-Type": "text/html" });
+const express = require("express");
+const app = express();
+const http = require("http");
+const server = http.createServer(app);
+const io = new Server<
+  ClientToServerEvents,
+  ServerToClientEvents,
+  InterServerEvents,
+  SocketData
+>();
 
-    res.write("<html><body><p>This is home Page.1</p></body></html>");
-    res.end();
-  }
+app.get("/", (req: any, res: any) => {
+  res.send("<h1>Hello world</h1>");
 });
+io.on("ping", () => {
+  console.log("ping, they say");
+});
+io.on("connection", (socket) => {
+  socket.on("hello", () => {
+    console.log("hello, they say");
+  });
+  socket.emit("noArg");
+  socket.emit("basicEmit", 1, "2", Buffer.from([3]));
+  socket.emit("withAck", "4", (e) => {
+    // e is inferred as number
+  });
 
-server.listen(5000); //3 - listen for any incoming requests
+  // works when broadcast to all
+  io.emit("noArg");
 
-console.log(`Node.js web server at port ${5000} is running..`);
+  // works when broadcasting to a room
+  io.to("room1").emit("basicEmit", 1, "2", Buffer.from([3]));
+});
+server.listen(3000, () => {
+  console.log("listening on *:3000");
+});
