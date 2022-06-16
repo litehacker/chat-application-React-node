@@ -1,26 +1,20 @@
-import React from 'react';
-import logo from './logo.svg';
-import './App.css';
+import React from "react";
+import { io, Socket } from "socket.io-client";
+import {
+  ServerToClientEvents,
+  ClientToServerEvents,
+} from "./InterfaceTypes/intex";
 
 function App() {
-  return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.tsx</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
-  );
+  const [socket, setSocket] = React.useState<
+    Socket<ServerToClientEvents, ClientToServerEvents>
+  >(io("http://localhost:3000", { transports: ["websocket"] }));
+
+  React.useEffect((): any => {
+    return () => socket.close();
+  }, [setSocket]);
+
+  return <div className="App">Hello React</div>;
 }
 
 export default App;

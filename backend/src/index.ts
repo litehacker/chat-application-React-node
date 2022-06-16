@@ -5,40 +5,27 @@ import {
   InterServerEvents,
   SocketData,
 } from "./InterfaceTypes/intex";
+import { createServer } from "http";
+import express from "express";
 
-const express = require("express");
 const app = express();
-const http = require("http");
-const server = http.createServer(app);
+const httpServer = createServer(app);
 const io = new Server<
   ClientToServerEvents,
   ServerToClientEvents,
   InterServerEvents,
   SocketData
->();
+>(httpServer, {});
 
-app.get("/", (req: any, res: any) => {
-  res.send("<h1>Hello world</h1>");
-});
 io.on("ping", () => {
   console.log("ping, they say");
 });
+
 io.on("connection", (socket) => {
+  console.log("connection", socket.id);
   socket.on("hello", () => {
-    console.log("hello, they say");
+    console.log("hello, they say", socket.id);
   });
-  socket.emit("noArg");
-  socket.emit("basicEmit", 1, "2", Buffer.from([3]));
-  socket.emit("withAck", "4", (e) => {
-    // e is inferred as number
-  });
-
-  // works when broadcast to all
-  io.emit("noArg");
-
-  // works when broadcasting to a room
-  io.to("room1").emit("basicEmit", 1, "2", Buffer.from([3]));
 });
-server.listen(3000, () => {
-  console.log("listening on *:3000");
-});
+
+httpServer.listen(5000);
