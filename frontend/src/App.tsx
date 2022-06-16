@@ -4,40 +4,32 @@ import { Data } from "./DummyData/data";
 import { MessageType } from "./types";
 
 const App = () => {
-  const [messagesProvider, setMessagesProvider] = React.useState(new Data());
-  const [messages, setMessages] = React.useState<MessageType[]>([]);
-  const [userId, setUserId] = React.useState("2");
+  const [messages, setMessages] = React.useState<MessageType[]>(
+    new Data().getMessages()
+  );
+  const [userId] = React.useState("2");
+  const [prevMessageUser, setPrevMessageUser] = React.useState<string>();
 
-  React.useEffect(() => {
-    setMessages(messagesProvider.getMessages());
-  }, []);
   return (
     <div className="App">
       <div className="content">
         <div className="chat">
           {messages.map((message) => {
             return (
-              <>
-                <div className="mine messages">
-                  <div className="message">Dude</div>
-                </div>
-              </>
+              <div
+                className={`${
+                  message.author === userId ? "mine" : "yours"
+                } messages `}
+              >
+                <div className={`message`}>{message.content}</div>
+              </div>
             );
           })}
-          <div className="mine messages">
-            <div className="message">Dude</div>
-          </div>
-          <div className="yours messages">
-            <div className="message">Hey!</div>
-            <div className="message">You there?</div>
-            <div className="message">Hello, how's it going?</div>
-          </div>
-          <div className="mine messages">
-            <div className="message">Great thanks!</div>
-            <div className="message">How about you?</div>
-          </div>
         </div>
-        <input placeholder="Hit Enter to send" />
+        <input
+          placeholder="Hit Enter to send"
+          onSubmit={() => console.log("submited input")}
+        />
       </div>
     </div>
   );

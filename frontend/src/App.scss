@@ -43,7 +43,6 @@
 }
 
 .messages {
-  margin-top: 30px;
   display: flex;
   flex-direction: column;
 }
@@ -80,6 +79,7 @@
   border-bottom-right-radius: 15px;
   background: linear-gradient(#c7cacf, #e7eaef);
 }
+
 .yours .message:after {
   content: "";
   position: absolute;

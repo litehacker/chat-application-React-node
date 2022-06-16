@@ -14,6 +14,16 @@ export class Data {
     },
     {
       timeStamp: new Date(),
+      content: "hello 2",
+      author: "2",
+    },
+    {
+      timeStamp: new Date(),
+      content: "hello 2",
+      author: "2",
+    },
+    {
+      timeStamp: new Date(),
       content: "hello 3",
       author: "1",
     },
