@@ -18,33 +18,36 @@ const io = new Server(httpServer, {
     origin: "http://localhost:3000",
   },
 });
-let rooms: { roomId: string; userId: string }[] = [];
+let users: { roomId: string; userId: string; userName?: string }[] = [];
 
 let roomID: string = "";
 io.on("connection", (socket) => {
   console.log("connection", socket.id);
-  // on order to separate each two users by one room,
 
-  if (rooms.length % 2 === 0) {
+  // on order to separate each two users by one room,
+  if (users.length % 2 === 0) {
     roomID = uuid();
-    //countUsers = 0; // reset users
   }
-  rooms.push({ roomId: roomID, userId: socket.id });
 
   console.log(socket.id, " in room #", roomID);
   socket.join(roomID);
 
   socket.on("message", (payload: MessageType) => {
-    const room: string | undefined = rooms.find(
+    const room: string | undefined = users.find(
       (room) => room.userId === payload.author.id
     )?.roomId;
     io.to(room ? room : "undefined room").emit("message", payload);
-    console.log(
-      payload.content,
-      " says ",
-      payload.author.name,
-      payload.author.id
-    );
+  });
+
+  socket.on("add user", (payload) => {
+    users.push({ roomId: roomID, userId: socket.id, userName: payload });
+    // send them their names
+    if (users.length % 2 === 0) {
+      io.to(users[users.length - 1].roomId).emit("users", [
+        users[users.length - 1].userName,
+        users[users.length - 2].userName,
+      ]);
+    }
   });
 });
 

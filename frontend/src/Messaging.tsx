@@ -21,6 +21,7 @@ export const Messaging = ({
   const [inputValue, setInputValue] = React.useState<string>("");
   const [loading, setLoading] = React.useState<boolean>(true);
   const [socket, setSocket] = React.useState<any>(undefined);
+  const [oponentUser, setOponentUser] = React.useState<string>("");
   useEffectOnce(() => {
     setSocket(io("http://localhost:5000"));
     return () => console.log("my effect is destroying");
@@ -30,12 +31,21 @@ export const Messaging = ({
     if (socket) {
       socket.on("connect", () => {
         console.log(socket.id); // x8WIv7-mJelg7on_ALbx
+        socket.emit("add user", { id: socket.id, name: user.name });
         if (user) setUser({ ...user, id: socket.id });
         setLoading(false);
       });
       socket.on("message", (payload: MessageType) => {
         console.log(payload);
         setMessages((prev) => [...prev, payload]);
+      });
+      socket.on("users", (userNames: any[]) => {
+        console.log(userNames);
+        setOponentUser(
+          userNames[0].name === user.name
+            ? userNames[1].name
+            : userNames[0].name
+        );
       });
     }
   }, [socket]);
@@ -55,7 +65,7 @@ export const Messaging = ({
               paddingLeft: "8px",
             }}
           >
-            <h2>Chat with - {user.name}</h2>
+            <h2>Chat with - {oponentUser.toString()}</h2>
           </div>
           <div className="chat">
             {messages.map((message, i) => {
