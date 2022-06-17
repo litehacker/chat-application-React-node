@@ -18,29 +18,27 @@ const io = new Server(httpServer, {
     origin: "http://localhost:3000",
   },
 });
-let countUsers: number = 0;
-let rooms: UserType[] = [];
-
-io.on("ping", () => {
-  console.log("ping, they say");
-});
+let rooms: { roomId: string; userId: string }[] = [];
 
 let roomID: string = "";
 io.on("connection", (socket) => {
   console.log("connection", socket.id);
   // on order to separate each two users by one room,
 
-  if (countUsers % 2 === 0) {
+  if (rooms.length % 2 === 0) {
     roomID = uuid();
-    countUsers = 0; // reset users
+    //countUsers = 0; // reset users
   }
+  rooms.push({ roomId: roomID, userId: socket.id });
 
   console.log(socket.id, " in room #", roomID);
-  countUsers++;
   socket.join(roomID);
 
   socket.on("message", (payload: MessageType) => {
-    io.to(roomID).emit("message", payload);
+    const room: string | undefined = rooms.find(
+      (room) => room.userId === payload.author.id
+    )?.roomId;
+    io.to(room ? room : "undefined room").emit("message", payload);
     console.log(
       payload.content,
       " says ",
