@@ -16,3 +16,12 @@ export interface SocketData {
   name: string;
   age: number;
 }
+export interface MessageType {
+  timeStamp: Date;
+  content: string;
+  author: UserType;
+}
+export interface UserType {
+  id: string;
+  name: string;
+}

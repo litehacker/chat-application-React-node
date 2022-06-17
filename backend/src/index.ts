@@ -4,18 +4,15 @@ import {
   ServerToClientEvents,
   InterServerEvents,
   SocketData,
+  MessageType,
+  UserType,
 } from "./InterfaceTypes/intex";
 import { createServer } from "http";
 import express from "express";
 
 const app = express();
 const httpServer = createServer(app);
-const io = new Server<
-  ClientToServerEvents,
-  ServerToClientEvents,
-  InterServerEvents,
-  SocketData
->(httpServer, {
+const io = new Server(httpServer, {
   cors: {
     origin: "http://localhost:3000",
   },
@@ -27,8 +24,13 @@ io.on("ping", () => {
 
 io.on("connection", (socket) => {
   console.log("connection", socket.id);
-  socket.on("hello", () => {
-    console.log("hello, they say", socket.id);
+  socket.join("private room");
+  socket.on("hello", (payload: UserType) => {
+    console.log("hello, they say", payload.name);
+  });
+  socket.on("message", (payload: MessageType) => {
+    io.to("private room").emit("message", payload);
+    console.log(payload.content, " says ", payload.author.name);
   });
 });
 
