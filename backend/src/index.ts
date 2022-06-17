@@ -49,14 +49,16 @@ io.on("connection", (socket) => {
       ]);
     }
   });
-  socket.on("command name", (user: UserType) => {
-    console.log("command name");
+  socket.on("/nick", (user: UserType) => {
+    console.log("command name", user);
+    let tmpRoomId = users.find((u) => u.userId === user.id)?.roomId;
+    io.to(tmpRoomId ? tmpRoomId : "unknown room").emit("/nick", user);
   });
-  socket.on("command message", (user: UserType) => {
-    console.log("command message");
+  socket.on("/think", (payload: any) => {
+    console.log("command message", payload);
   });
-  socket.on("command oops", (user: UserType) => {
-    console.log("command oops");
+  socket.on("/oops", (payload: any) => {
+    console.log("command oops", payload);
   });
 });
 

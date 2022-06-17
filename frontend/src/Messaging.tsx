@@ -3,7 +3,7 @@ import "./App.scss";
 import { Data } from "./DummyData/data";
 import { useEffectOnce } from "./hooks/useEffectOnce";
 import { User } from "./InterfaceTypes/intex";
-import { MessageType } from "./types";
+import { MessageType, UserType } from "./types";
 const { io } = require("socket.io-client");
 export const Messaging = ({
   setUser,
@@ -47,13 +47,13 @@ export const Messaging = ({
             : userNames[0].name
         );
       });
-      socket.on("command name", (name: string) => {
-        setOponentUser(name);
+      socket.on("/nick", (userPayload: UserType) => {
+        if (userPayload.id !== socket.id) setOponentUser(userPayload.name);
       });
-      socket.on("command message", (message: MessageType) => {
+      socket.on("/think", (message: MessageType) => {
         setMessages((prev) => [...prev, message]);
       });
-      socket.on("command oops", (payload: MessageType) => {
+      socket.on("/oops", (payload: MessageType) => {
         setMessages((prev) => [
           ...prev.filter((message) => message.author.id !== payload.author.id),
         ]);
@@ -100,23 +100,36 @@ export const Messaging = ({
           <input
             placeholder="Hit Enter to send"
             onKeyDown={(e) => {
-              if (e.key === "Enter" && inputValue.length)
-                if (inputValue.startsWith("/nick ")) {
+              if (e.key === "Enter" && inputValue.length) {
+                if (
+                  inputValue.startsWith("/nick ") &&
+                  inputValue.split(" ").length > 1
+                ) {
+                  socket.emit("/nick", {
+                    name: inputValue.split(" ")[1],
+                    id: user.id,
+                  });
                 } else if (inputValue.startsWith("/think ")) {
+                  // makes the text appear in dark grey, instead of black
                 } else if (inputValue === "/opps") {
+                  // removes the last message sent
                 } else if (inputValue === "/fadelast") {
+                  // would fade out the last message to 10% visibility
                 } else if (inputValue.startsWith("/highlight ")) {
+                  // would make the font of the message 10% bigger, and make the background 10% darker
                 } else if (
                   inputValue.startsWith("/countdown ") &&
                   !isNaN(parseInt(inputValue.split(" ")[1], 10)) &&
                   inputValue.split(" ").length === 3
                 ) {
-                }
-              socket.emit("message", {
-                timeStamp: new Date(),
-                content: inputValue,
-                author: user,
-              });
+                  // would start a visible countdown and redirect 5... 4... [...] 1... !!!
+                } else
+                  socket.emit("message", {
+                    timeStamp: new Date(),
+                    content: inputValue,
+                    author: user,
+                  });
+              }
               return handleKeyDown(e, setInputValue);
             }}
             value={inputValue}
