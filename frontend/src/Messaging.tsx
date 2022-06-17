@@ -47,6 +47,17 @@ export const Messaging = ({
             : userNames[0].name
         );
       });
+      socket.on("command name", (name: string) => {
+        setOponentUser(name);
+      });
+      socket.on("command message", (message: MessageType) => {
+        setMessages((prev) => [...prev, message]);
+      });
+      socket.on("command oops", (payload: MessageType) => {
+        setMessages((prev) => [
+          ...prev.filter((message) => message.author.id !== payload.author.id),
+        ]);
+      });
     }
   }, [socket]);
 
@@ -76,7 +87,12 @@ export const Messaging = ({
                     message.author.id === user.id ? "mine" : "yours"
                   } messages `}
                 >
-                  <div className={`message`}>{message.content}</div>
+                  <div
+                    className={`message`}
+                    style={message.dark ? { color: "grey" } : {}}
+                  >
+                    {message.content}
+                  </div>
                 </div>
               );
             })}
@@ -85,11 +101,22 @@ export const Messaging = ({
             placeholder="Hit Enter to send"
             onKeyDown={(e) => {
               if (e.key === "Enter" && inputValue.length)
-                socket.emit("message", {
-                  timeStamp: new Date(),
-                  content: inputValue,
-                  author: user,
-                });
+                if (inputValue.startsWith("/nick ")) {
+                } else if (inputValue.startsWith("/think ")) {
+                } else if (inputValue === "/opps") {
+                } else if (inputValue === "/fadelast") {
+                } else if (inputValue.startsWith("/highlight ")) {
+                } else if (
+                  inputValue.startsWith("/countdown ") &&
+                  !isNaN(parseInt(inputValue.split(" ")[1], 10)) &&
+                  inputValue.split(" ").length === 3
+                ) {
+                }
+              socket.emit("message", {
+                timeStamp: new Date(),
+                content: inputValue,
+                author: user,
+              });
               return handleKeyDown(e, setInputValue);
             }}
             value={inputValue}

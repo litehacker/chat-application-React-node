@@ -49,6 +49,15 @@ io.on("connection", (socket) => {
       ]);
     }
   });
+  socket.on("command name", (user: UserType) => {
+    console.log("command name");
+  });
+  socket.on("command message", (user: UserType) => {
+    console.log("command message");
+  });
+  socket.on("command oops", (user: UserType) => {
+    console.log("command oops");
+  });
 });
 
 httpServer.listen(5000);

@@ -20,6 +20,7 @@ export interface MessageType {
   timeStamp: Date;
   content: string;
   author: UserType;
+  dark?: boolean;
 }
 export interface UserType {
   id: string;
