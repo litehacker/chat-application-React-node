@@ -5,7 +5,7 @@ export interface MessageBubbleType {
 export interface MessageType {
   timeStamp: Date;
   content: string;
-  author: UserType["id"];
+  author: UserType;
 }
 export interface UserType {
   id: string;

@@ -14,32 +14,32 @@ export class Data {
       {
         timeStamp: new Date(),
         content: "hello",
-        author: "1",
+        author: { id: "1", name: "Giorgi" },
       },
       {
         timeStamp: new Date(),
         content: "hello 2",
-        author: "2",
+        author: { id: "2", name: "Guest" },
       },
       {
         timeStamp: new Date(),
         content: "hello 2",
-        author: "2",
+        author: { id: "2", name: "Guest" },
       },
       {
         timeStamp: new Date(),
         content: "hello 2",
-        author: "2",
+        author: { id: "2", name: "Guest" },
       },
       {
         timeStamp: new Date(),
         content: "hello 3",
-        author: "1",
+        author: { id: "1", name: "Giorgi" },
       },
       {
         timeStamp: new Date(),
         content: "hello 4",
-        author: "2",
+        author: { id: "1", name: "Giorgi" },
       },
     ];
   }

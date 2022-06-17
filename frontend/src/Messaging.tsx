@@ -13,7 +13,9 @@ export const Messaging = ({
   user: User;
 }) => {
   // mock data
-  const [messages] = React.useState<MessageType[]>(new Data().getMessages());
+  const [messages, setMessages] = React.useState<MessageType[]>(
+    new Data().getMessages()
+  );
   // -----------
   const [inputValue, setInputValue] = React.useState<string>("");
   const [loading, setLoading] = React.useState<boolean>(true);
@@ -24,12 +26,13 @@ export const Messaging = ({
   });
 
   React.useEffect(() => {
-    if (socket)
+    if (socket) {
       socket.on("connect", () => {
         console.log(socket.id); // x8WIv7-mJelg7on_ALbx
         if (user) setUser({ ...user, id: socket.id });
         setLoading(false);
       });
+    }
   }, [socket]);
 
   return (
@@ -55,7 +58,7 @@ export const Messaging = ({
                 <div
                   key={i}
                   className={`${
-                    message.author === user.id ? "mine" : "yours"
+                    message.author.id === user.id ? "mine" : "yours"
                   } messages `}
                 >
                   <div className={`message`}>{message.content}</div>
@@ -66,7 +69,12 @@ export const Messaging = ({
           <input
             placeholder="Hit Enter to send"
             onKeyDown={(e) => {
-              socket.emit("hello", "world");
+              if (e.key === "Enter")
+                socket.emit("message", {
+                  timeStamp: new Date(),
+                  content: inputValue,
+                  author: user,
+                });
               return handleKeyDown(e, setInputValue);
             }}
             value={inputValue}
