@@ -5,66 +5,77 @@ import { useEffectOnce } from "./hooks/useEffectOnce";
 import { User } from "./InterfaceTypes/intex";
 import { MessageType } from "./types";
 const { io } = require("socket.io-client");
-
-export const Messaging = () => {
+export const Messaging = ({
+  setUser,
+  user,
+}: {
+  setUser: React.Dispatch<React.SetStateAction<User>>;
+  user: User;
+}) => {
   // mock data
-  const [messages, setMessages] = React.useState<MessageType[]>(
-    new Data().getMessages()
-  );
+  const [messages] = React.useState<MessageType[]>(new Data().getMessages());
   // -----------
-  const [user] = React.useState<User>(new Data().getUser());
   const [inputValue, setInputValue] = React.useState<string>("");
   const [loading, setLoading] = React.useState<boolean>(true);
+  const [socket, setSocket] = React.useState<any>(undefined);
   useEffectOnce(() => {
-    const socket = io("http://localhost:5000");
-    socket.on("connect", () => {
-      console.log(socket.id); // x8WIv7-mJelg7on_ALbx
-      setLoading(false);
-    });
+    setSocket(io("http://localhost:5000"));
     return () => console.log("my effect is destroying");
   });
 
+  React.useEffect(() => {
+    if (socket)
+      socket.on("connect", () => {
+        console.log(socket.id); // x8WIv7-mJelg7on_ALbx
+        if (user) setUser({ ...user, id: socket.id });
+        setLoading(false);
+      });
+  }, [socket]);
+
   return (
     <div className="App">
-      <div className="content">
-        <div
-          style={{
-            height: 50,
-            background: "white",
-            borderRadius: 3,
-            border: "1px solid lightblue",
-            fontSize: 14,
-            fontWeight: 500,
-            paddingLeft: "8px",
-          }}
-        >
-          <h2>Chat with - {user.name}</h2>
+      {!loading && user && (
+        <div className="content">
+          <div
+            style={{
+              height: 50,
+              background: "white",
+              borderRadius: 3,
+              border: "1px solid lightblue",
+              fontSize: 14,
+              fontWeight: 500,
+              paddingLeft: "8px",
+            }}
+          >
+            <h2>Chat with - {user.name}</h2>
+          </div>
+          <div className="chat">
+            {messages.map((message, i) => {
+              return (
+                <div
+                  key={i}
+                  className={`${
+                    message.author === user.id ? "mine" : "yours"
+                  } messages `}
+                >
+                  <div className={`message`}>{message.content}</div>
+                </div>
+              );
+            })}
+          </div>
+          <input
+            placeholder="Hit Enter to send"
+            onKeyDown={(e) => {
+              socket.emit("hello", "world");
+              return handleKeyDown(e, setInputValue);
+            }}
+            value={inputValue}
+            onChange={(event) => {
+              setInputValue(event.target.value);
+            }}
+          />
         </div>
-        <div className="chat">
-          {messages.map((message, i) => {
-            return (
-              <div
-                key={i}
-                className={`${
-                  message.author === user.id ? "mine" : "yours"
-                } messages `}
-              >
-                <div className={`message`}>{message.content}</div>
-              </div>
-            );
-          })}
-        </div>
-        <input
-          placeholder="Hit Enter to send"
-          onKeyDown={(e) => {
-            return handleKeyDown(e, setInputValue);
-          }}
-          value={inputValue}
-          onChange={(event) => {
-            setInputValue(event.target.value);
-          }}
-        />
-      </div>
+      )}
     </div>
   );
 };

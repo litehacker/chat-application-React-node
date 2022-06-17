@@ -1,15 +1,14 @@
 import React from "react";
-import { Link, NavLink } from "react-router-dom";
+import { NavLink } from "react-router-dom";
 import "./App.scss";
 import { User } from "./InterfaceTypes/intex";
-const submitClick = () => {};
 
 export const Home = ({
   setUser,
 }: {
-  setUser: React.Dispatch<React.SetStateAction<User | undefined>>;
+  setUser: React.Dispatch<React.SetStateAction<User>>;
 }) => {
-  const [input, setInput] = React.useState("");
+  const [input, setInput] = React.useState<string>("");
   return (
     <div className="App">
       <div className="content" style={{ paddingTop: "50vh" }}>
@@ -22,7 +21,7 @@ export const Home = ({
         <NavLink to="/chat">
           <button
             style={{ width: "100%" }}
-            onClick={(e) => setUser({ id: "1", name: input })}
+            onClick={() => setUser({ id: "", name: input })}
             disabled={!(input.length > 0)}
           >
             Start chat

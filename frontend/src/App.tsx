@@ -5,11 +5,17 @@ import { User } from "./InterfaceTypes/intex";
 import { Messaging } from "./Messaging";
 
 export const App = () => {
-  const [user, setUser] = React.useState<User>();
+  const [user, setUser] = React.useState<User>({ id: "", name: "" });
   return (
     <Routes>
       <Route path="/" element={<Home setUser={setUser} />} />
-      <Route path="chat" element={<Messaging />} />
+      {user.name.length && (
+        <Route
+          path="chat"
+          element={<Messaging setUser={setUser} user={user} />}
+        />
+      )}
+      <Route path="*" element={<Home setUser={setUser} />} />
     </Routes>
   );
 };
