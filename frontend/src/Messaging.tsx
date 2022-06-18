@@ -50,9 +50,6 @@ export const Messaging = ({
       socket.on("/nick", (userPayload: UserType) => {
         if (userPayload.id !== socket.id) setOponentUser(userPayload.name);
       });
-      socket.on("/think", (message: MessageType) => {
-        setMessages((prev) => [...prev, message]);
-      });
       socket.on("/oops", (payload: MessageType) => {
         setMessages((prev) => [
           ...prev.filter((message) => message.author.id !== payload.author.id),
@@ -103,14 +100,23 @@ export const Messaging = ({
               if (e.key === "Enter" && inputValue.length) {
                 if (
                   inputValue.startsWith("/nick ") &&
-                  inputValue.split(" ").length > 1
+                  inputValue.split("/nick ").length > 0
                 ) {
                   socket.emit("/nick", {
-                    name: inputValue.split(" ")[1],
+                    name: inputValue.split("/nick ")[1],
                     id: user.id,
                   });
-                } else if (inputValue.startsWith("/think ")) {
+                } else if (
+                  inputValue.startsWith("/think ") &&
+                  inputValue.split("/think ").length > 0
+                ) {
                   // makes the text appear in dark grey, instead of black
+                  socket.emit("message", {
+                    timeStamp: new Date(),
+                    content: inputValue,
+                    author: user,
+                    dark: true,
+                  });
                 } else if (inputValue === "/opps") {
                   // removes the last message sent
                 } else if (inputValue === "/fadelast") {
