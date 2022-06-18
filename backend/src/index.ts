@@ -54,8 +54,11 @@ io.on("connection", (socket) => {
     let tmpRoomId = users.find((u) => u.userId === user.id)?.roomId;
     io.to(tmpRoomId ? tmpRoomId : "unknown room").emit("/nick", user);
   });
-  socket.on("/oops", (payload: any) => {
-    console.log("command oops", payload);
+  socket.on("/oops", (payloadID: string) => {
+    const room: string | undefined = users.find(
+      (room) => room.userId === payloadID
+    )?.roomId;
+    io.to(room ? room : "undefined room").emit("/oops", payloadID);
   });
 });
 

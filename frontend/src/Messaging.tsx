@@ -50,9 +50,9 @@ export const Messaging = ({
       socket.on("/nick", (userPayload: UserType) => {
         if (userPayload.id !== socket.id) setOponentUser(userPayload.name);
       });
-      socket.on("/oops", (payload: MessageType) => {
+      socket.on("/oops", (id: string) => {
         setMessages((prev) => [
-          ...prev.filter((message) => message.author.id !== payload.author.id),
+          ...prev.splice(messages.map((m) => m.author.id).lastIndexOf(id), 1),
         ]);
       });
     }
@@ -117,8 +117,9 @@ export const Messaging = ({
                     author: user,
                     dark: true,
                   });
-                } else if (inputValue === "/opps") {
+                } else if (inputValue === "/oops") {
                   // removes the last message sent
+                  socket.emit("/oops", socket.id);
                 } else if (inputValue === "/fadelast") {
                   // would fade out the last message to 10% visibility
                 } else if (inputValue.startsWith("/highlight ")) {
