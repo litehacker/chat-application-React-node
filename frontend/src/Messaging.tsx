@@ -5,6 +5,7 @@ import { useEffectOnce } from "./hooks/useEffectOnce";
 import { User } from "./InterfaceTypes/intex";
 import { MessageType, UserType } from "./types";
 const { io } = require("socket.io-client");
+
 export const Messaging = ({
   setUser,
   user,
@@ -12,6 +13,8 @@ export const Messaging = ({
   setUser: React.Dispatch<React.SetStateAction<User>>;
   user: User;
 }) => {
+  const bottomRef = React.useRef<null | HTMLDivElement>(null);
+
   // mock data
   // const [messages, setMessages] = React.useState<MessageType[]>(
   //   new Data().getMessages()
@@ -26,6 +29,12 @@ export const Messaging = ({
     setSocket(io("http://localhost:5000"));
     return () => console.log("my effect is destroying");
   });
+  React.useEffect(() => {
+    // 👇️ scroll to bottom every time messages change
+    // https://bobbyhadz.com/blog/react-scroll-to-bottom
+    if (bottomRef.current)
+      bottomRef.current.scrollIntoView({ behavior: "auto" });
+  }, [messages]);
 
   React.useEffect(() => {
     if (socket) {
@@ -58,6 +67,29 @@ export const Messaging = ({
       socket.on("/fadelast", (updatedMessages: MessageType[]) => {
         setMessages(updatedMessages);
       });
+      socket.on(
+        "/countdown",
+        (payload: { count: number; link: string; user: UserType }) => {
+          let counter = payload.count;
+
+          var looper = setInterval(() => {
+            if (counter === 1) {
+              clearInterval(looper);
+              if (socket.id !== payload.user.id)
+                window.open(payload.link, "_blank");
+            }
+            counter--;
+            setMessages((prev) => [
+              ...prev,
+              {
+                timeStamp: new Date(),
+                content: String(counter + 1) + "...",
+                author: payload.user,
+              },
+            ]);
+          }, 1000);
+        }
+      );
     }
   }, [socket]);
 
@@ -97,8 +129,10 @@ export const Messaging = ({
                 </div>
               );
             })}
+            <div ref={bottomRef} />
           </div>
           <input
+            disabled={!oponentUser}
             placeholder="Hit Enter to send"
             onKeyDown={(e) => {
               if (e.key === "Enter" && inputValue.length) {
@@ -128,17 +162,26 @@ export const Messaging = ({
                   // would fade out the last message to 10% visibility
                   socket.emit("/fadelast", socket.id, messages);
                 } else if (inputValue.startsWith("/highlight ")) {
-                  // would make the font of the message 10% bigger, and make the background 10% darker
+                  // would make the font of the message 10% bigger, and
+                  // make the background 10% darker
                 } else if (
                   inputValue.startsWith("/countdown ") &&
                   !isNaN(parseInt(inputValue.split(" ")[1], 10)) &&
                   inputValue.split(" ").length === 3
                 ) {
-                  // would start a visible countdown and redirect 5... 4... [...] 1... !!!
+                  // would start a visible countdown and redirect 5... 4...
+                  // [...] 1... !!!
+                  socket.emit("/countdown", {
+                    count: parseInt(inputValue.split(" ")[1], 10),
+                    link: inputValue.split(" ")[2],
+                    user: { id: socket.id },
+                  });
                 } else
                   socket.emit("message", {
                     timeStamp: new Date(),
-                    content: inputValue,
+                    content: inputValue
+                      .replace("(smile)", String.fromCodePoint(0x1f60a))
+                      .replace("(wink)", String.fromCodePoint(0x1f609)),
                     author: user,
                   });
               }

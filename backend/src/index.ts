@@ -74,6 +74,15 @@ io.on("connection", (socket) => {
       messages.splice(index, 1, { ...messages[index], faded: true });
     io.to(room ? room : "undefined room").emit("/fadelast", messages);
   });
+
+  socket.on(
+    "/countdown",
+    (payload: { count: number; link: string; user: UserType }) => {
+      console.log("command countdown", payload.user);
+      let tmpRoomId = users.find((u) => u.userId === payload.user.id)?.roomId;
+      io.to(tmpRoomId ? tmpRoomId : "unknown room").emit("/countdown", payload);
+    }
+  );
 });
 
 httpServer.listen(5000);
