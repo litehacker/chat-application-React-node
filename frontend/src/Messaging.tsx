@@ -52,15 +52,11 @@ export const Messaging = ({
       });
 
       socket.on("/oops", (updatedMessages: MessageType[]) => {
-        //console.log(messages.map((m) => m.author.id).lastIndexOf(id), messages);
-
         setMessages(updatedMessages);
       });
 
-      socket.on("/fadelast", (id: string) => {
-        // const messageIndex = messages.map((m) => m.author.id).lastIndexOf(id);
-        // messages[messageIndex] = { ...messages[messageIndex], faded: true };
-        // setMessages(messages);
+      socket.on("/fadelast", (updatedMessages: MessageType[]) => {
+        setMessages(updatedMessages);
       });
     }
   }, [socket]);
@@ -130,7 +126,7 @@ export const Messaging = ({
                   socket.emit("/oops", socket.id, messages);
                 } else if (inputValue === "/fadelast") {
                   // would fade out the last message to 10% visibility
-                  socket.emit("/fadelast", socket.id);
+                  socket.emit("/fadelast", socket.id, messages);
                 } else if (inputValue.startsWith("/highlight ")) {
                   // would make the font of the message 10% bigger, and make the background 10% darker
                 } else if (

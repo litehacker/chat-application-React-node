@@ -65,12 +65,14 @@ io.on("connection", (socket) => {
     io.to(room ? room : "undefined room").emit("/oops", messages);
   });
 
-  socket.on("/fadelast", (payloadID: string) => {
-    console.log("fade started", payloadID);
+  socket.on("/fadelast", (payloadID: string, messages: MessageType[]) => {
     const room: string | undefined = users.find(
       (room) => room.userId === payloadID
     )?.roomId;
-    io.to(room ? room : "undefined room").emit("/oops", payloadID);
+    const index = messages.map((m) => m.author.id).lastIndexOf(payloadID);
+    if (index !== -1)
+      messages.splice(index, 1, { ...messages[index], faded: true });
+    io.to(room ? room : "undefined room").emit("/fadelast", messages);
   });
 });
 
