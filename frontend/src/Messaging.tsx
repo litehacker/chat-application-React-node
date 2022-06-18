@@ -4,6 +4,8 @@ import { Data } from "./DummyData/data";
 import { useEffectOnce } from "./hooks/useEffectOnce";
 import { User } from "./InterfaceTypes/intex";
 import { MessageType, UserType } from "./types";
+import Parser from "html-react-parser";
+
 const { io } = require("socket.io-client");
 
 export const Messaging = ({
@@ -70,24 +72,26 @@ export const Messaging = ({
       socket.on(
         "/countdown",
         (payload: { count: number; link: string; user: UserType }) => {
-          let counter = payload.count;
+          if (socket.id !== payload.user.id) {
+            let counter = payload.count;
 
-          var looper = setInterval(() => {
-            if (counter === 1) {
-              clearInterval(looper);
-              if (socket.id !== payload.user.id)
+            var looper = setInterval(() => {
+              if (counter === 1) {
+                clearInterval(looper);
+
                 window.open(payload.link, "_blank");
-            }
-            counter--;
-            setMessages((prev) => [
-              ...prev,
-              {
-                timeStamp: new Date(),
-                content: String(counter + 1) + "...",
-                author: payload.user,
-              },
-            ]);
-          }, 1000);
+              }
+              counter--;
+              setMessages((prev) => [
+                ...prev,
+                {
+                  timeStamp: new Date(),
+                  content: String(counter + 1) + "...",
+                  author: payload.user,
+                },
+              ]);
+            }, 1000);
+          }
         }
       );
     }
@@ -108,7 +112,11 @@ export const Messaging = ({
               paddingLeft: "8px",
             }}
           >
-            <h2>Chat with - {oponentUser.toString()}</h2>
+            {oponentUser ? (
+              <h2>Chat with - {oponentUser.toString()}</h2>
+            ) : (
+              <h2>Wait for opponent please.</h2>
+            )}
           </div>
           <div className="chat">
             {messages.map((message, i) => {
@@ -123,7 +131,7 @@ export const Messaging = ({
                     className={`message`}
                     style={message.dark ? { color: "grey" } : {}}
                   >
-                    {message.content}
+                    {Parser(message.content)}
                   </div>
                   {message.faded && <div className="fade"></div>}
                 </div>
@@ -164,6 +172,17 @@ export const Messaging = ({
                 } else if (inputValue.startsWith("/highlight ")) {
                   // would make the font of the message 10% bigger, and
                   // make the background 10% darker
+                  socket.emit("message", {
+                    timeStamp: new Date(),
+                    content: `<strong style="font-size: 16px;">${inputValue
+                      .split("/highlight ")[1]
+                      .replace("(smile)", String.fromCodePoint(0x1f60a))
+                      .replace(
+                        "(wink)",
+                        String.fromCodePoint(0x1f609)
+                      )}</strong>`,
+                    author: user,
+                  });
                 } else if (
                   inputValue.startsWith("/countdown ") &&
                   !isNaN(parseInt(inputValue.split(" ")[1], 10)) &&

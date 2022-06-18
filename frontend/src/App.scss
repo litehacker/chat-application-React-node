@@ -155,9 +155,6 @@ input {
   height: 35px;
   right: 0px;
   position: fixed;
-  background-image: linear-gradient(
-    to bottom,
-    rgba(245, 249, 255, 1) 0%,
-    rgba(255, 255, 255, 0) 100%
-  );
+  background-color: #f5f9ff;
+  opacity: 0.9;
 }
