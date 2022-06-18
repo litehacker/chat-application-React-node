@@ -49,12 +49,24 @@ io.on("connection", (socket) => {
       ]);
     }
   });
+
   socket.on("/nick", (user: UserType) => {
     console.log("command name", user);
     let tmpRoomId = users.find((u) => u.userId === user.id)?.roomId;
     io.to(tmpRoomId ? tmpRoomId : "unknown room").emit("/nick", user);
   });
-  socket.on("/oops", (payloadID: string) => {
+
+  socket.on("/oops", (payloadID: string, messages: MessageType[]) => {
+    const room: string | undefined = users.find(
+      (room) => room.userId === payloadID
+    )?.roomId;
+    const index = messages.map((m) => m.author.id).lastIndexOf(payloadID);
+    if (index !== -1) messages.splice(index, 1);
+    io.to(room ? room : "undefined room").emit("/oops", messages);
+  });
+
+  socket.on("/fadelast", (payloadID: string) => {
+    console.log("fade started", payloadID);
     const room: string | undefined = users.find(
       (room) => room.userId === payloadID
     )?.roomId;

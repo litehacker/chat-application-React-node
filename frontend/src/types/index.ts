@@ -7,6 +7,7 @@ export interface MessageType {
   content: string;
   author: UserType;
   dark?: boolean;
+  faded?: boolean;
 }
 export interface UserType {
   id: string;

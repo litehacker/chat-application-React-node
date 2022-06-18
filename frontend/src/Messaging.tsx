@@ -50,10 +50,17 @@ export const Messaging = ({
       socket.on("/nick", (userPayload: UserType) => {
         if (userPayload.id !== socket.id) setOponentUser(userPayload.name);
       });
-      socket.on("/oops", (id: string) => {
-        setMessages((prev) => [
-          ...prev.splice(messages.map((m) => m.author.id).lastIndexOf(id), 1),
-        ]);
+
+      socket.on("/oops", (updatedMessages: MessageType[]) => {
+        //console.log(messages.map((m) => m.author.id).lastIndexOf(id), messages);
+
+        setMessages(updatedMessages);
+      });
+
+      socket.on("/fadelast", (id: string) => {
+        // const messageIndex = messages.map((m) => m.author.id).lastIndexOf(id);
+        // messages[messageIndex] = { ...messages[messageIndex], faded: true };
+        // setMessages(messages);
       });
     }
   }, [socket]);
@@ -90,6 +97,7 @@ export const Messaging = ({
                   >
                     {message.content}
                   </div>
+                  {message.faded && <div className="fade"></div>}
                 </div>
               );
             })}
@@ -119,9 +127,10 @@ export const Messaging = ({
                   });
                 } else if (inputValue === "/oops") {
                   // removes the last message sent
-                  socket.emit("/oops", socket.id);
+                  socket.emit("/oops", socket.id, messages);
                 } else if (inputValue === "/fadelast") {
                   // would fade out the last message to 10% visibility
+                  socket.emit("/fadelast", socket.id);
                 } else if (inputValue.startsWith("/highlight ")) {
                   // would make the font of the message 10% bigger, and make the background 10% darker
                 } else if (
